@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="267494c1-7b6a-491d-9b04-23c1c19f350f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/core/src/main/kotlin/org/fishnpotatoes/routine/groups/RoutineGroups.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/core/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/Main.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/org/fishnpotatoes/routine/Routine.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/org/fishnpotatoes/routine/Routine.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/org/fishnpotatoes/routine/RoutineManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/org/fishnpotatoes/routine/RoutineManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,7 +118,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1752626628667</updated>
-      <workItem from="1752626630255" duration="9801000" />
+      <workItem from="1752626630255" duration="11403000" />
     </task>
     <servers />
   </component>
