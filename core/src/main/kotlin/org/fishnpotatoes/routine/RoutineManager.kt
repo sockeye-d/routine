@@ -1,14 +1,23 @@
 package org.fishnpotatoes.routine
 
+import kotlin.Any
+import kotlin.collections.filter
+
 
 private typealias Action = () -> Unit
 
+/**
+ * The thing that runs the [Routine]s
+ */
 object RoutineManager {
     internal val routines = mutableListOf<RoutineBuilder>()
-    internal val required = mutableMapOf<Any, RoutineBuilder>()
+    internal val locks = mutableMapOf<Any, RoutineBuilder>()
     internal val deferredActions = mutableListOf<Action>()
 
-    fun tick() {
+    val hasCommands
+        get() = routines.isNotEmpty()
+
+    fun tick(): Boolean {
         // runs twice because you want all routines added before ticking to get added,
         // and you also want all the commands that can be removed to be removed as soon as possible
         runDeferred()
@@ -21,6 +30,7 @@ object RoutineManager {
             }
         }
         runDeferred()
+        return hasCommands
     }
 
     private fun runDeferred() {
@@ -29,20 +39,20 @@ object RoutineManager {
     }
 
     internal fun defer(block: Action) = deferredActions.add(block)
-    internal fun addRequirements(routine: RoutineBuilder) {
-        required.putAll(routine.requirements.map { it to routine })
+    internal fun lock(routine: RoutineBuilder) {
+        locks.putAll(routine.locks.map { it to routine })
     }
 
-    internal fun removeRequirements(routine: RoutineBuilder) {
-        routine.requirements.forEach(required::remove)
+    internal fun unlock(routine: RoutineBuilder) {
+        routine.locks.forEach(locks::remove)
     }
 
-    internal fun conflictingRoutines(requirements: Set<Any>) =
-        requirements.filter { it in required.keys }.map { required[it]!! }.toSet()
+    internal fun conflictingRoutines(locks: Set<Any>) =
+        locks.filter { it in RoutineManager.locks.keys }.map { RoutineManager.locks[it]!! }.toSet()
 }
 
 fun RoutineBuilder.run(interruptOther: Boolean = true) = RoutineManager.defer {
-    val conflicts = RoutineManager.conflictingRoutines(requirements)
+    val conflicts = RoutineManager.conflictingRoutines(locks)
     if (!interruptOther && conflicts.isEmpty()) {
         return@defer
     }
@@ -52,11 +62,11 @@ fun RoutineBuilder.run(interruptOther: Boolean = true) = RoutineManager.defer {
     }
 
     RoutineManager.routines.add(this)
-    RoutineManager.addRequirements(this)
+    RoutineManager.lock(this)
 }
 
 fun RoutineBuilder.interrupt() {
     interruptRoutine()
     RoutineManager.routines.remove(this)
-    RoutineManager.removeRequirements(this)
+    RoutineManager.unlock(this)
 }

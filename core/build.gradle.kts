@@ -1,6 +1,6 @@
 plugins {
     application
-    kotlin("jvm")
+    kotlin("jvm") version "2.2.0"
 }
 
 dependencies {
