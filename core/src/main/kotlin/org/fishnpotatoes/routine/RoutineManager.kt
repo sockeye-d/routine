@@ -11,7 +11,7 @@ private typealias Action = () -> Unit
  */
 object RoutineManager {
     internal val routines = mutableListOf<RoutineBuilder>()
-    internal val locks = mutableMapOf<Any, RoutineBuilder>()
+    internal val activeLocks = mutableMapOf<Any, RoutineBuilder>()
     internal val deferredActions = mutableListOf<Action>()
 
     val hasCommands
@@ -40,19 +40,24 @@ object RoutineManager {
 
     internal fun defer(block: Action) = deferredActions.add(block)
     internal fun lock(routine: RoutineBuilder) {
-        locks.putAll(routine.locks.map { it to routine })
+        activeLocks.putAll(routine.locks.map { it to routine })
     }
 
     internal fun unlock(routine: RoutineBuilder) {
-        routine.locks.forEach(locks::remove)
+        routine.locks.forEach(activeLocks::remove)
     }
 
     internal fun conflictingRoutines(locks: Set<Any>) =
-        locks.filter { it in RoutineManager.locks.keys }.map { RoutineManager.locks[it]!! }.toSet()
+        locks.filter(activeLocks::contains).map { activeLocks[it]!! }.toSet()
+
+    override fun toString() = """
+    Active Routines:
+        ${routines.joinToString("\n        ") { "$it${if (it.locks.isEmpty()) "" else " \uD83D\uDD12 "}${it.locks.joinToString(", ")}" }}
+    """.trimIndent()
 }
 
 fun RoutineBuilder.run(interruptOther: Boolean = true) = RoutineManager.defer {
-    val conflicts = RoutineManager.conflictingRoutines(locks)
+    val conflicts = RoutineManager.conflictingRoutines(this.locks)
     if (!interruptOther && conflicts.isEmpty()) {
         return@defer
     }

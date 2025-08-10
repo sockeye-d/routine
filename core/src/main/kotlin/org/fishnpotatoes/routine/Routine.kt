@@ -13,16 +13,29 @@ interface Routine {
     val locks: Set<Any>
     var finished: Boolean
     var name: String
+    var display: () -> String
     suspend fun yield(): Boolean
     suspend fun ready()
 
+    /**
+     * Adds a set of objects to the list of locks in the routine.
+     * If you're adding multiple locks from a list,
+     * prefer [requiresAll].
+     */
     fun requires(vararg any: Any)
     fun Any.lock() = requires(this)
 }
 
+/**
+ * Adds a collection of objects the list of locks in the routine.
+ */
+inline fun Routine.requiresAll(any: Collection<Any>) = requires(*any.toTypedArray())
+
 class RoutineBuilder internal constructor() : Routine {
     internal lateinit var startContinuation: Continuation<Unit>
     internal lateinit var yieldContinuation: Continuation<Boolean>
+
+    private val initialized get() = ::yieldContinuation.isInitialized
 
     private val mutRequirements = mutableSetOf<Any>()
     override val locks
@@ -30,13 +43,12 @@ class RoutineBuilder internal constructor() : Routine {
         get() = mutRequirements
     override var finished: Boolean = false
     override var name: String = "Routine${State.i}"
+    override var display = { name }
     internal var hasRun = false
 
     fun runSingleStep() {
-        if (finished) {
-            throw IllegalStateException("Already finished. Generate a new command, please.")
-        }
-        if (::yieldContinuation.isInitialized) {
+        if (finished) throw IllegalStateException("Already finished. Generate a new command, please.")
+        if (initialized) {
             yieldContinuation.resume(false)
         } else {
             startContinuation.resume(Unit)
@@ -44,8 +56,7 @@ class RoutineBuilder internal constructor() : Routine {
     }
 
     fun interruptRoutine() {
-        if (::yieldContinuation.isInitialized)
-            yieldContinuation.resume(true)
+        if (initialized) yieldContinuation.resume(true)
         finished = true
     }
 
@@ -72,6 +83,8 @@ class RoutineBuilder internal constructor() : Routine {
         val i
             get() = _i++
     }
+
+    override fun toString() = display()
 }
 
 /**

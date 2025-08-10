@@ -3,13 +3,23 @@ package org.fishnpotatoes.routine.groups
 import org.fishnpotatoes.routine.*
 import java.util.Collections
 
+fun groupDisplayString(
+    groupedRoutine: Routine,
+    routines: Array<out RoutineBuilder>,
+    prefix: (Int, RoutineBuilder) -> String = { _, _ -> "    " },
+) = """${groupedRoutine.name} {
+    ${routines.mapIndexed { i, it -> prefix(i, it) + it.toString() }.joinToString("\n")}
+    }
+""".trimMargin()
+
 fun parallel(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = routine {
     for (routine in routines) {
         require(Collections.disjoint(routine.locks, locks)) {
             "Commands in a parallel group cannot share requirements"
         }
-        requires(*routine.locks.toTypedArray())
+        requiresAll(routine.locks)
     }
+    display = { groupDisplayString(this, routines) }
     setup()
     ready()
     while (!routines.all(Routine::finished)) {
@@ -27,9 +37,8 @@ fun parallel(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = 
 
 fun sequential(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = routine {
     var current = 0
-    for (routine in routines) {
-        requires(routine.locks)
-    }
+    requiresAll(routines.flatMap { it.locks })
+    display = { groupDisplayString(this, routines) { i, _ -> if (i == current) "   >" else "    " } }
     setup()
     ready()
     while (current < routines.size) {
@@ -47,17 +56,17 @@ fun sequential(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) 
     }
 }
 
-fun deadline(deadlineRoutine: RoutineBuilder, vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = routine {
+fun deadline(deadline: RoutineBuilder, vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = routine {
     for (routine in routines) {
         require(Collections.disjoint(routine.locks, locks)) {
             "Commands in a deadline parallel group cannot share requirements"
         }
-        requires(*routine.locks.toTypedArray())
+        requiresAll(routine.locks)
     }
     setup()
     ready()
-    while (!deadlineRoutine.finished) {
-        deadlineRoutine.runSingleStep()
+    while (!deadline.finished) {
+        deadline.runSingleStep()
         for (routine in routines) {
             if (!routine.finished) routine.runSingleStep()
         }
