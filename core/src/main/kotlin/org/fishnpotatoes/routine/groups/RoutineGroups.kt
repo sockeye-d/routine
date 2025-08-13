@@ -6,20 +6,20 @@ import java.util.Collections
 fun groupDisplayString(
     groupedRoutine: Routine,
     routines: Array<out RoutineBuilder>,
-    prefix: (Int, RoutineBuilder) -> String = { _, _ -> "    " },
-) = """${groupedRoutine.name} {
-    ${routines.mapIndexed { i, it -> prefix(i, it) + it.toString() }.joinToString("\n")}
-    }
+    prefix: (Int, RoutineBuilder) -> String = { _, _ -> "" },
+) = """${groupedRoutine.name}
+${routines.mapIndexed { i, rt -> rt.toString() }.joinToString("\n").prependIndent(RoutineManager.INDENT)}
 """.trimMargin()
 
 fun parallel(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = routine {
+    typeName = "parallel"
     for (routine in routines) {
         require(Collections.disjoint(routine.locks, locks)) {
             "Commands in a parallel group cannot share requirements"
         }
         requiresAll(routine.locks)
     }
-    display = { groupDisplayString(this, routines) }
+    display = { groupDisplayString(this, routines) { i, rt -> if (!rt.finished) ">" else "." } }
     setup()
     ready()
     while (!routines.all(Routine::finished)) {
@@ -35,10 +35,11 @@ fun parallel(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = 
     }
 }
 
-fun sequential(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = routine {
+fun serial(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = routine {
+    typeName = "serial"
     var current = 0
     requiresAll(routines.flatMap { it.locks })
-    display = { groupDisplayString(this, routines) { i, _ -> if (i == current) "   >" else "    " } }
+    display = { groupDisplayString(this, routines) { i, _ -> if (i == current) ">" else "." } }
     setup()
     ready()
     while (current < routines.size) {
@@ -57,6 +58,7 @@ fun sequential(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) 
 }
 
 fun deadline(deadline: RoutineBuilder, vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = routine {
+    typeName = "deadline"
     for (routine in routines) {
         require(Collections.disjoint(routine.locks, locks)) {
             "Commands in a deadline parallel group cannot share requirements"

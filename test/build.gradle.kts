@@ -1,15 +1,16 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    kotlin("jvm").apply(true)
+    kotlin("jvm") apply true
     id("org.jetbrains.compose") version "1.8.2"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.21"
 }
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(compose.desktop.currentOs)
     implementation(project(":core"))
+    implementation("androidx.collection:collection:1.5.0")
 }
 
 repositories {
@@ -19,7 +20,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(23)
+    jvmToolchain(21)
 }
 
 compose.desktop {
