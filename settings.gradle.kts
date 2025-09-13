@@ -32,7 +32,7 @@ plugins {
 
 include(":core")
 include(":util")
-//include(":ftc")
+include(":ftc")
 //include(":test")
 
 rootProject.name = "routine"

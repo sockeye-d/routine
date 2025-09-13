@@ -1,42 +1,34 @@
-package org.fishnpotatoes.routine.ftc.drivers.sensorange
+package org.firstinspires.ftc.teamcode.drivers.sensorange
 
-import com.qualcomm.robotcore.hardware.AnalogInput
 import com.qualcomm.robotcore.hardware.AnalogInputController
 import com.qualcomm.robotcore.hardware.HardwareDevice
+import com.qualcomm.robotcore.hardware.HardwareDevice.Manufacturer
 import com.qualcomm.robotcore.hardware.configuration.annotations.AnalogSensorType
 import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties
-import org.fishnpotatoes.routine.util.geometry.Radians
-import org.fishnpotatoes.routine.util.geometry.degrees
-import org.fishnpotatoes.routine.util.geometry.times
 
 @AnalogSensorType
 @DeviceProperties(
-    name = "@string/configTypeSensOrangeAbsoluteEncoder",
+    name = "sensOrange Absolute Encoder",
     xmlTag = "SensOrangeAbsoluteEncoder",
-    builtIn = false
+    description = "sensOrange Absolute Encoder absolute encoder"
 )
-class SensOrangeAbsoluteEncoder(controller: AnalogInputController, channel: Int) : AnalogInput(controller, channel) {
-    var offset = Radians.ZERO
-    var maxAngle = 360.degrees
-    var maxReportedVoltage = 3.3
-    var inverted = false
+class SensOrangeAbsoluteEncoder(
+    private val controller: AnalogInputController?, private val channel: Int,
+) : HardwareDevice {
 
-    private var lastAngle = Radians.ZERO
+    override fun getManufacturer(): Manufacturer? {
+        return this.controller?.manufacturer
+    }
 
-    val angle
-        get() = (voltage * maxAngle / maxReportedVoltage).rotated(offset).let(if (inverted) { it -> -it } else { it -> it })
-    var totalAngle = Radians.ZERO
-        private set
-        get() {
-            if (field == Radians.ZERO) {
-                field = angle
-                lastAngle = angle
-            }
-            field += angle.angleTo(lastAngle)
-            lastAngle = angle
-            return field
-        }
+    val voltage get() = controller?.getAnalogInputVoltage(this.channel) ?: -1.0
 
-    override fun getManufacturer() = HardwareDevice.Manufacturer.Other
     override fun getDeviceName() = "sensOrange Absolute Encoder"
+
+    override fun getConnectionInfo() = "${this.controller!!.connectionInfo}; analog port ${this.channel}"
+
+    override fun getVersion() = 1
+
+    override fun resetDeviceConfigurationForOpMode() = Unit
+
+    override fun close() = Unit
 }

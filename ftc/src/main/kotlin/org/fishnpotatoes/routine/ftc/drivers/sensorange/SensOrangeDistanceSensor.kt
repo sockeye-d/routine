@@ -1,4 +1,4 @@
-package org.fishnpotatoes.routine.ftc.drivers.sensorange
+package org.firstinspires.ftc.teamcode.drivers.sensorange
 
 import com.qualcomm.robotcore.hardware.AnalogInput
 import com.qualcomm.robotcore.hardware.AnalogInputController
@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.configuration.annotations.DevicePropertie
 import kotlin.math.roundToInt
 
 @AnalogSensorType
-@DeviceProperties(name = "@string/configTypeAnalogEncoder", xmlTag = "AnalogEncoder", builtIn = false)
+@DeviceProperties(name = "sensOrange Distance Sensor", xmlTag = "SensOrangeDistanceSensor", description = "sensOrange distance sensor")
 class SensOrangeDistanceSensor(controller: AnalogInputController, channel: Int) : AnalogInput(controller, channel) {
     var maxReportedVoltage = 3.3
     val distance
@@ -684,5 +684,3 @@ class SensOrangeDistanceSensor(controller: AnalogInputController, channel: Int) 
         )
     }
 }
-
-fun SensOrangeDistanceSensor.a() {}
