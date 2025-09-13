@@ -20,6 +20,7 @@ pluginManagement {
     repositories {
         google()
         gradlePluginPortal()
+        maven("https://repo.dairy.foundation/releases")
     }
 }
 
@@ -31,7 +32,7 @@ plugins {
 
 include(":core")
 include(":util")
-include(":ftc")
+//include(":ftc")
 //include(":test")
 
 rootProject.name = "routine"

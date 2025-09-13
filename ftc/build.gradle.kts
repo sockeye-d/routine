@@ -1,12 +1,25 @@
 import org.gradle.kotlin.dsl.dependencies
 
 plugins {
-    id("com.android.library") version "8.7.0"
-    id("org.jetbrains.kotlin.android") version "2.1.0"
+    id("dev.frozenmilk.android-library") version "10.1.1-0.1.3"
 }
 
-group = "org.fishnpotatoes.routine"
-version = "1.0-SNAPSHOT"
+android.namespace = "org.fishnpotatoes.routine"
+
+ftc {
+    kotlin
+
+    sdk {
+        RobotCore
+        Hardware
+        FtcCommon {
+            configurationNames += "testImplementation"
+        }
+    }
+}
+
+//group = "org.fishnpotatoes.routine"
+//version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -18,38 +31,38 @@ dependencies {
     compileOnly("com.acmerobotics.dashboard:dashboard:0.4.17") {
         exclude("org.firstinspires.ftc")
     }
-    compileOnly("org.firstinspires.ftc:RobotCore:11.0.0")
-    compileOnly("org.firstinspires.ftc:Hardware:11.0.0")
-    compileOnly(project(":core"))
-    compileOnly(project(":util"))
+    //compileOnly("org.firstinspires.ftc:RobotCore:11.0.0")
+    //compileOnly("org.firstinspires.ftc:Hardware:11.0.0")
+    implementation(project(":core"))
+    implementation(project(":util"))
 }
 
-android {
-    namespace = "org.fishnpotatoes.routine.ftc"
-    compileSdk = 35
-
-    defaultConfig {
-        minSdk = 24
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    publishing {
-        multipleVariants {
-            withSourcesJar()
-            withJavadocJar()
-            allVariants()
-        }
-    }
-}
+//android {
+//    namespace = "org.fishnpotatoes.routine.ftc"
+//    compileSdk = 35
+//
+//    defaultConfig {
+//        minSdk = 24
+//    }
+//
+//    buildTypes {
+//        release {
+//            isMinifyEnabled = false
+//        }
+//    }
+//    compileOptions {
+//        sourceCompatibility = JavaVersion.VERSION_11
+//        targetCompatibility = JavaVersion.VERSION_11
+//    }
+//    kotlinOptions {
+//        jvmTarget = "11"
+//    }
+//
+//    publishing {
+//        multipleVariants {
+//            withSourcesJar()
+//            withJavadocJar()
+//            allVariants()
+//        }
+//    }
+//}
