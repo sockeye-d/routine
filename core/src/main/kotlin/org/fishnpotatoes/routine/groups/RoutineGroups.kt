@@ -1,8 +1,14 @@
 package org.fishnpotatoes.routine.groups
 
 import org.fishnpotatoes.routine.*
+import org.fishnpotatoes.routine.groups.onlyFinished
+import org.fishnpotatoes.routine.util.indexRange
 import java.util.Collections
+import kotlin.time.Duration
 
+/**
+ * @suppress
+ */
 fun groupDisplayString(
     groupedRoutine: Routine,
     routines: Array<out RoutineBuilder>,
@@ -11,6 +17,17 @@ fun groupDisplayString(
 ${routines.mapIndexed { i, rt -> rt.toString() }.joinToString("\n").prependIndent(RoutineManager.INDENT)}
 """.trimMargin()
 
+private val Array<out RoutineBuilder>.onlyFinished
+    get() = this.filter { it.finished }
+
+private val Array<out RoutineBuilder>.onlyUnfinished
+    get() = this.filter { !it.finished }
+
+/**
+ * Run a set of routines in parallel.
+ *
+ * On interrupt, all
+ */
 fun parallel(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = routine {
     typeName = "parallel"
     for (routine in routines) {
@@ -22,16 +39,13 @@ fun parallel(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = 
     display = { groupDisplayString(this, routines) { i, rt -> if (!rt.finished) ">" else "." } }
     setup()
     ready()
-    while (!routines.all(Routine::finished)) {
-        for (routine in routines) {
-            if (!routine.finished) routine.runSingleStep()
+    yieldWhile({ !routines.all(Routine::finished) }) {
+        for (routine in routines.onlyUnfinished) {
+            routine.runSingleStep()
         }
-
-        if (yield()) {
-            for (routine in routines) {
-                routine.interrupt()
-            }
-        }
+    }
+    for (routine in routines.onlyUnfinished) {
+        routine.interrupt()
     }
 }
 
@@ -50,10 +64,12 @@ fun serial(vararg routines: RoutineBuilder, setup: Routine.() -> Unit = {}) = ro
         }
 
         if (yield()) {
-            for (routine in routines) {
-                routine.interrupt()
-            }
+            break
         }
+    }
+
+    if (current in routines.indexRange) {
+        routines[current].interrupt()
     }
 }
 
@@ -65,23 +81,19 @@ fun deadline(deadline: RoutineBuilder, vararg routines: RoutineBuilder, setup: R
         }
         requiresAll(routine.locks)
     }
+    display = { groupDisplayString(this, arrayOf(deadline, *routines)) { i, rt -> if (!rt.finished) ">" else "." } }
     setup()
     ready()
-    while (!deadline.finished) {
+    yieldWhile({ !deadline.finished && routines.onlyUnfinished.isNotEmpty() }) {
         deadline.runSingleStep()
-        for (routine in routines) {
-            if (!routine.finished) routine.runSingleStep()
-        }
-
-        if (yield()) {
-            for (routine in routines) {
-                routine.interrupt()
-            }
-            return@routine
+        for (routine in routines.onlyUnfinished) {
+            routine.runSingleStep()
         }
     }
 
-    for (routine in routines) {
+    for (routine in routines.onlyUnfinished) {
         routine.interrupt()
     }
 }
+
+fun RoutineBuilder.timeout(duration: Duration) = deadline(wait(duration), this)

@@ -1,11 +1,13 @@
 package org.fishnpotatoes.routine.util.math
 
+import org.fishnpotatoes.routine.util.geometry.Vector2
 import kotlin.math.absoluteValue
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sign
+import kotlin.math.sqrt
 
 /**
  * Calculates the good modulo of two numbers.
@@ -141,3 +143,8 @@ fun remap(min0: Double, max0: Double, min1: Double, max1: Double, t: Double) = l
 
 fun remap(range0: ClosedRange<Double>, range1: ClosedRange<Double>, t: Double) =
     remap(range0.start, range0.endInclusive, range1.start, range1.endInclusive, t)
+
+fun Double.halfLinearHalfCubic() = this / 2.0 + this * this * this / 2.0
+fun Vector2.halfLinearHalfCubic() = this / 2.0 + this * this * this / 2.0
+
+fun Double.symmetricSqrt() = sqrt(absoluteValue) * sign

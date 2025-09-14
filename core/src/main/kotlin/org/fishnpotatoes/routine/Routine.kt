@@ -1,5 +1,6 @@
 package org.fishnpotatoes.routine
 
+import java.lang.Thread.yield
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.intrinsics.createCoroutineUnintercepted
@@ -10,6 +11,7 @@ import kotlin.coroutines.suspendCoroutine
  * Represents a single action.
  */
 interface Routine {
+    var restart: Boolean
     val locks: Set<Any>
     var finished: Boolean
     var name: String
@@ -42,6 +44,7 @@ class RoutineBuilder internal constructor() : Routine {
     override val locks
         // please don't downcast this
         get() = mutRequirements
+    override var restart: Boolean = false
     override var finished: Boolean = false
     override var name: String = "Routine${State.i}"
     override var typeName: String = ""
@@ -124,3 +127,17 @@ fun routine(block: suspend Routine.() -> Unit): RoutineBuilder {
 }
 
 fun Routine.setup(block: Routine.() -> Unit) = this.block()
+
+suspend inline fun Routine.forever(block: suspend Routine.() -> Unit) {
+    while (true) {
+        this.block()
+        if (yield()) break
+    }
+}
+
+suspend inline fun Routine.yieldWhile(condition: Routine.() -> Boolean, block: suspend Routine.() -> Unit) {
+    while (condition()) {
+        this.block()
+        if (yield()) break
+    }
+}
