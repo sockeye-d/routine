@@ -473,7 +473,7 @@ class GoBildaPinpoint(
             )
             writeByteArray(
                 Register.H_ORIENTATION, floatToByteArray(
-                    value.heading.radians.toFloat(), ByteOrder.LITTLE_ENDIAN
+                    value.h.radians.toFloat(), ByteOrder.LITTLE_ENDIAN
                 )
             )
         }

@@ -3,23 +3,23 @@ package dev.fishies.routine.util.geometry
 /**
  * Data container that holds a position and a heading.
  */
-data class Pose2(val position: Vector2, val heading: Radians) {
+data class Pose2(val xy: Vector2, val h: Radians) {
     constructor(x: Inches, y: Inches, heading: Radians) : this(Vector2(x, y), heading)
 
-    val xyh get() = Triple(position.x, position.y, heading)
-    val x inline get() = position.x
-    val y inline get() = position.y
+    val xyh get() = Triple(xy.x, xy.y, h)
+    val x inline get() = xy.x
+    val y inline get() = xy.y
 
-    operator fun plus(other: Pose2) = Pose2(position + other.position, heading.rotated(other.heading))
-    operator fun plus(other: Radians) = Pose2(position, heading.rotated(other))
-    operator fun minus(other: Pose2) = Pose2(position - other.position, heading.rotated(-other.heading))
+    operator fun plus(other: Pose2) = Pose2(xy + other.xy, h.rotated(other.h))
+    operator fun plus(other: Radians) = Pose2(xy, h.rotated(other))
+    operator fun minus(other: Pose2) = Pose2(xy - other.xy, h.rotated(-other.h))
 
     /**
      * Simultaneously calculates the positional and angular distance between this and [other].
      *
      * @param other The other [Pose2] to calculate the distance to
      */
-    fun distanceTo(other: Pose2) = Pair(position.distanceTo(other.position), heading.angleTo(other.heading))
+    fun distanceTo(other: Pose2) = Pair(xy.distanceTo(other.xy), h.angleTo(other.h))
 
     /**
      * Calculates the positional distance from this to [other].
@@ -29,9 +29,9 @@ data class Pose2(val position: Vector2, val heading: Radians) {
      *
      * @param other The other [Vector2] to calculate the distance to
      */
-    fun distanceTo(other: Vector2) = position.distanceTo(other)
+    fun distanceTo(other: Vector2) = xy.distanceTo(other)
 
-    override fun toString() = "($position x $heading)"
+    override fun toString() = "($xy x $h)"
 
     companion object {
         val ZERO = Pose2(Vector2.Factory.ZERO, Radians.Companion.ZERO)
