@@ -1,7 +1,7 @@
-package org.fishnpotatoes.routine.util.geometry
+package org.fishies.routine.util.geometry
 
-import org.fishnpotatoes.routine.util.ClosedRangeT
-import org.fishnpotatoes.routine.util.OpenRangeT
+import org.fishies.routine.util.ClosedRangeT
+import org.fishies.routine.util.OpenRangeT
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor

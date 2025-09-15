@@ -1,4 +1,4 @@
-package org.fishnpotatoes.routine.ftc.extensions
+package org.fishies.routine.ftc.extensions
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.ValueProvider

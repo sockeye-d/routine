@@ -1,4 +1,4 @@
-package org.fishnpotatoes.routine.util.geometry
+package org.fishies.routine.util.geometry
 
 /**
  * Data container that holds a position and a heading.

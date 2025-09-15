@@ -1,6 +1,6 @@
-package org.fishnpotatoes.routine
+package org.fishies.routine
 
-import org.fishnpotatoes.routine.RoutineManager.restartableRoutines
+import org.fishies.routine.RoutineManager.restartableRoutines
 
 
 private typealias Action = () -> Unit

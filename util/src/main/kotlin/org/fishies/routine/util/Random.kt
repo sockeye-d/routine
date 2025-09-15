@@ -1,4 +1,4 @@
-package org.fishnpotatoes.routine.util
+package org.fishies.routine.util
 
 val Collection<*>.indexRange: IntRange get() = 0..<size
 val Array<out Any?>.indexRange: IntRange get() = 0..<size

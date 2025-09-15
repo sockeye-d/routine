@@ -1,7 +1,7 @@
-package org.fishnpotatoes.routine.ftc.extensions
+package org.fishies.routine.ftc.extensions
 
-import org.fishnpotatoes.routine.util.geometry.Vector2
-import org.fishnpotatoes.routine.util.geometry.inches
+import org.fishies.routine.util.geometry.Vector2
+import org.fishies.routine.util.geometry.inches
 import com.qualcomm.robotcore.hardware.Gamepad
 
 /**

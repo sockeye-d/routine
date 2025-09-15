@@ -1,7 +1,7 @@
-package org.fishnpotatoes.routine.ftc.drivers
+package org.fishies.routine.ftc.drivers
 
-import org.fishnpotatoes.routine.ftc.drivers.CachingVoltageSensor.voltage
-import org.fishnpotatoes.routine.ftc.extensions.HardwareMapEx
+import org.fishies.routine.ftc.drivers.CachingVoltageSensor.voltage
+import org.fishies.routine.ftc.extensions.HardwareMapEx
 import com.qualcomm.robotcore.hardware.VoltageSensor
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds

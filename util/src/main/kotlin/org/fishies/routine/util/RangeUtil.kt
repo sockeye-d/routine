@@ -1,4 +1,4 @@
-package org.fishnpotatoes.routine.util
+package org.fishies.routine.util
 
 /**
  * This is like [ClosedRange] but it lets you set the start and end which the other one doesn't let you do.

@@ -1,7 +1,6 @@
-package org.fishnpotatoes.routine.groups
+package org.fishies.routine.groups
 
-import org.fishnpotatoes.routine.routine
-import kotlin.math.roundToInt
+import org.fishies.routine.routine
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.TimeSource

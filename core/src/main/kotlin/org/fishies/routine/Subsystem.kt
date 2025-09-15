@@ -1,4 +1,4 @@
-package org.fishnpotatoes.routine
+package org.fishies.routine
 
 abstract class Subsystem(val name: String? = null) {
     init {

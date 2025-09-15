@@ -1,7 +1,7 @@
-package org.fishnpotatoes.routine.ftc.drivers
+package org.fishies.routine.ftc.drivers
 
 import android.util.Log
-import org.fishnpotatoes.routine.util.geometry.*
+import org.fishies.routine.util.geometry.*
 import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.I2cAddr

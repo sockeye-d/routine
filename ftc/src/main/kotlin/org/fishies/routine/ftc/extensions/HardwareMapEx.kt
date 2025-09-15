@@ -1,4 +1,4 @@
-package org.fishnpotatoes.routine.ftc.extensions
+package org.fishies.routine.ftc.extensions
 
 import com.qualcomm.robotcore.hardware.HardwareDevice
 import com.qualcomm.robotcore.hardware.HardwareMap

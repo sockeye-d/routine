@@ -1,10 +1,10 @@
-package org.fishnpotatoes.routine.util.geometry
+package org.fishies.routine.util.geometry
 
-import org.fishnpotatoes.routine.util.geometry.Radians.Companion.PI
-import org.fishnpotatoes.routine.util.geometry.Radians.Companion.TAU
-import org.fishnpotatoes.routine.util.math.umod
-import org.fishnpotatoes.routine.util.ClosedRangeT
-import org.fishnpotatoes.routine.util.OpenRangeT
+import org.fishies.routine.util.geometry.Radians.Companion.PI
+import org.fishies.routine.util.geometry.Radians.Companion.TAU
+import org.fishies.routine.util.math.umod
+import org.fishies.routine.util.ClosedRangeT
+import org.fishies.routine.util.OpenRangeT
 import java.util.*
 import kotlin.math.acos
 import kotlin.math.asin
@@ -183,17 +183,17 @@ value class Radians(val radians: Double) : Comparable<Radians>, Formattable {
         val ZERO = 0.0.radians
 
         /**
-         * Half-pi constant in [org.fishnpotatoes.routine.util.geometry.Radians]
+         * Half-pi constant in [org.fishies.routine.util.geometry.Radians]
          */
         val HPI = kotlin.math.PI.radians * 0.5
 
         /**
-         * Pi constant in [org.fishnpotatoes.routine.util.geometry.Radians]
+         * Pi constant in [org.fishies.routine.util.geometry.Radians]
          */
         val PI = kotlin.math.PI.radians
 
         /**
-         * Tau (2pi) constant in [org.fishnpotatoes.routine.util.geometry.Radians]
+         * Tau (2pi) constant in [org.fishies.routine.util.geometry.Radians]
          */
         val TAU = kotlin.math.PI.radians * 2.0
     }
@@ -279,7 +279,7 @@ fun asin(x: Double) = asin(x).radians
 fun atan(x: Double) = atan(x).radians
 
 /**
- * @see org.fishnpotatoes.routine.util.math.umod
+ * @see org.fishies.routine.util.math.umod
  */
 fun umod(x: Radians, y: Radians) = Radians(umod(x.radians, y.radians))
 fun atan2(y: Inches, x: Inches) = atan2(y.inches, x.inches).radians

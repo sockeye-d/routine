@@ -1,6 +1,6 @@
-import org.fishnpotatoes.routine.RoutineManager
-import org.fishnpotatoes.routine.routine
-import org.fishnpotatoes.routine.run
+import org.fishies.routine.RoutineManager
+import org.fishies.routine.routine
+import org.fishies.routine.run
 
 fun customCommand(subsystem: Any?, label: String) = routine {
     subsystem?.lock()

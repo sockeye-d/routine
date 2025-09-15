@@ -1,6 +1,5 @@
-package org.fishnpotatoes.routine
+package org.fishies.routine
 
-import java.lang.Thread.yield
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.intrinsics.createCoroutineUnintercepted

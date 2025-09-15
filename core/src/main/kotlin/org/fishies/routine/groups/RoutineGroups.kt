@@ -1,8 +1,7 @@
-package org.fishnpotatoes.routine.groups
+package org.fishies.routine.groups
 
-import org.fishnpotatoes.routine.*
-import org.fishnpotatoes.routine.groups.onlyFinished
-import org.fishnpotatoes.routine.util.indexRange
+import org.fishies.routine.*
+import org.fishies.routine.util.indexRange
 import java.util.Collections
 import kotlin.time.Duration
 

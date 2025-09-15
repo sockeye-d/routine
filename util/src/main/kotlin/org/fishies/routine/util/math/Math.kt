@@ -1,6 +1,6 @@
-package org.fishnpotatoes.routine.util.math
+package org.fishies.routine.util.math
 
-import org.fishnpotatoes.routine.util.geometry.Vector2
+import org.fishies.routine.util.geometry.Vector2
 import kotlin.math.absoluteValue
 import kotlin.math.ceil
 import kotlin.math.floor
