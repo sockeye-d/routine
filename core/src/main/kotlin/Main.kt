@@ -1,6 +1,6 @@
-import org.fishies.routine.RoutineManager
-import org.fishies.routine.routine
-import org.fishies.routine.run
+import dev.fishies.routine.RoutineManager
+import dev.fishies.routine.RoutineManager.run
+import dev.fishies.routine.routine
 
 fun customCommand(subsystem: Any?, label: String) = routine {
     subsystem?.lock()
@@ -25,7 +25,6 @@ fun main() {
     RoutineManager.tick()
     rt2.run(interruptOther = false)
 
-    @Suppress("ControlFlowWithEmptyBody")
-    while (RoutineManager.tick()) {
+    @Suppress("ControlFlowWithEmptyBody") while (RoutineManager.tick()) {
     }
 }
