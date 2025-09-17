@@ -6,9 +6,6 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 object DashboardEx {
-    val dash
-        get() = FtcDashboard.getInstance() as FtcDashboard
-
     val variables = HashMap<String, Any?>()
 
     /**
@@ -25,16 +22,14 @@ object DashboardEx {
         val (category, name) = convertProperty(property)
         variables[property] = initial
         // add the config variable to the thing
-        dash.addConfigVariable(
-            category, name,
-            object : ValueProvider<T> {
+        FtcDashboard.addConfigVariable(
+            category, name, object : ValueProvider<T> {
                 override fun get() = variables[property] as T
 
                 override fun set(value: T?) {
                     variables[property] = value
                 }
-            }
-        )
+            })
 
         return object : ReadOnlyProperty<Any?, T> {
             override operator fun getValue(thisRef: Any?, property: KProperty<*>) = dashProperty
@@ -59,9 +54,11 @@ object DashboardEx {
 
     fun convertProperty(property: String): Pair<String, String> {
         val propertySplit = property.split("/")
-        return (if('/' in property) propertySplit[0] else "Config") to propertySplit.last()
+        return (if ('/' in property) propertySplit[0] else "Config") to propertySplit.last()
     }
 
     override fun toString() =
         "${super.toString()} {\n${variables.entries.joinToString("\n") { (name, value) -> "$name: $value" }}\n}"
 }
+
+val FtcDashboard: FtcDashboard get() = com.acmerobotics.dashboard.FtcDashboard.getInstance()

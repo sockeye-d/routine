@@ -1,15 +1,12 @@
 package dev.fishies.routine
 
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.*
 import kotlin.coroutines.intrinsics.createCoroutineUnintercepted
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Represents a single action.
  */
-interface Routine {
+interface RoutineScope {
     /**
      * Whether to restart this command after being interrupted by another command.
      * Restarting commands get shuffled off to a queue to get retried each tick if they don't conflict with any other
@@ -76,31 +73,43 @@ interface Routine {
      * Adds `this` the list of locks in the routine.
      */
     fun Any.lock() = requires(this)
+
+    /**
+     * Run another routine as a subroutine of this routine.
+     *
+     * **NOTE**: Child routines **do not** propagate their locks to their parents!
+     */
+    suspend fun await(subroutine: Routine) {
+        while (!subroutine.finished) {
+            subroutine.runSingleStep()
+            yield()
+        }
+    }
 }
 
 /**
- * Adds a collection of objects the list of locks in the routine.
+ * Adds a collection of objects to the list of locks in the routine.
  */
-fun Routine.requiresAll(any: Collection<Any>) = requires(*any.toTypedArray())
+fun RoutineScope.requiresAll(any: Collection<Any>) = requires(*any.toTypedArray())
 
-class RoutineBuilder internal constructor(
+class Routine internal constructor(
     override val name: String,
     override val typeName: String,
-) : Routine {
+) : RoutineScope {
     internal lateinit var startContinuation: Continuation<Unit>
     internal lateinit var yieldContinuation: Continuation<Boolean>
 
     private val initialized get() = ::yieldContinuation.isInitialized
 
     private val mutRequirements = mutableSetOf<Any>()
-    override val locks
-        // please don't downcast this
+    override val locks: Set<Any>
         get() = mutRequirements
     override var restart: Boolean = false
     internal var _finished: Boolean = false
-    override val finished: Boolean
-        get() = _finished
+    override val finished get() = _finished
     override var display = { name }
+    internal var _interrupted = false
+    val interrupted get() = _interrupted
 
     private var tick = 0
 
@@ -111,7 +120,7 @@ class RoutineBuilder internal constructor(
 
     fun runSingleStep() {
         assert(!finished) { "Already finished (did you attempt to reuse a command?)" }
-        if (::yieldContinuation.isInitialized) {
+        if (initialized) {
             yieldContinuation.resume(false)
         } else {
             startContinuation.resume(Unit)
@@ -120,7 +129,10 @@ class RoutineBuilder internal constructor(
     }
 
     fun interruptRoutine() {
-        if (::yieldContinuation.isInitialized) yieldContinuation.resume(true)
+        if (initialized && !finished) {
+            yieldContinuation.resumeWithException(RoutineInterruptedException())
+        }
+        _interrupted = true
         _finished = true
     }
 
@@ -139,9 +151,8 @@ class RoutineBuilder internal constructor(
     }
 
     internal object State {
-        var backingI = 0
-        val i
-            get() = backingI++
+        var i: Int = 0
+            get() = field++
     }
 
     private val idle = charArrayOf(
@@ -159,18 +170,20 @@ class RoutineBuilder internal constructor(
     override fun toString() = "${idleDisplay()} ($typeName) ${display()}"
 }
 
+class RoutineInterruptedException : Throwable()
+
 /**
  * Creates a routine from a given block of code.
  *
  * A basic routine represents a single action to be executed.
  * Multiple routines can be run at the same time with the cooperatively multitasking coroutine model,
- * where each routine "takes turns" with the other routines by yielding control flow with [Routine.yield].
+ * where each routine "takes turns" with the other routines by yielding control flow with [RoutineScope.yield].
  *
  * Individual routines can be composed together with groups like [dev.fishies.routine.compose.serial] to perform more
  * complex actions, or decorated with functions like [dev.fishies.routine.compose.timeout] to add special effects to
  * each routine.
  *
- * Routines can also lock objects with [Routine.lock] or [Routine.requires] like a `synchronized` block would, so that
+ * Routines can also lock objects with [RoutineScope.lock] or [RoutineScope.requires] like a `synchronized` block would, so that
  * two routines that lock the same object can't run at the same time.
  *
  * Running routines are managed by the (surprise) [RoutineManager].
@@ -181,12 +194,17 @@ class RoutineBuilder internal constructor(
 fun routine(
     name: String? = null,
     typeName: String = "anonymous",
-    block: suspend Routine.() -> Unit,
-): RoutineBuilder {
-    val builder = RoutineBuilder(name ?: "Routine${RoutineBuilder.State.i}", typeName)
+    onInterrupted: () -> Unit = {},
+    block: suspend RoutineScope.() -> Unit,
+): Routine {
+    val builder = Routine(name ?: "Routine${Routine.State.i}", typeName)
     builder.startContinuation = block.createCoroutineUnintercepted(builder, Continuation(EmptyCoroutineContext) {
         if (it.isFailure) {
-            throw it.exceptionOrNull()!!
+            if (it.exceptionOrNull() is RoutineInterruptedException) {
+                onInterrupted()
+            } else {
+                throw it.exceptionOrNull()!!
+            }
         }
         builder._finished = true
     })
@@ -197,7 +215,7 @@ fun routine(
 /**
  * Run [block] forever, yielding after each iteration.
  */
-suspend inline fun Routine.forever(block: suspend Routine.() -> Unit) {
+suspend inline fun RoutineScope.forever(block: suspend RoutineScope.() -> Unit) {
     while (true) {
         this.block()
         if (yield()) break
@@ -207,7 +225,10 @@ suspend inline fun Routine.forever(block: suspend Routine.() -> Unit) {
 /**
  * Run [block] while [condition] is true, yielding after each iteration.
  */
-suspend inline fun Routine.yieldWhile(condition: Routine.() -> Boolean, block: suspend Routine.() -> Unit) {
+suspend inline fun RoutineScope.yieldWhile(
+    condition: RoutineScope.() -> Boolean,
+    block: suspend RoutineScope.() -> Unit,
+) {
     while (condition()) {
         this.block()
         if (yield()) break

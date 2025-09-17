@@ -9,17 +9,17 @@ import java.util.Collections
  * @suppress
  */
 fun groupDisplayString(
-    groupedRoutine: Routine,
-    routines: Array<out RoutineBuilder>,
-    prefix: (Int, RoutineBuilder) -> String = { _, _ -> "" },
+    groupedRoutine: RoutineScope,
+    routines: Array<out Routine>,
+    prefix: (Int, Routine) -> String = { _, _ -> "" },
 ) = """${groupedRoutine.name}
 ${routines.mapIndexed { i, rt -> rt.toString() }.joinToString("\n").prependIndent(RoutineManager.INDENT)}
 """.trimMargin()
 
-private val Array<out RoutineBuilder>.onlyFinished
+private val Array<out Routine>.onlyFinished
     get() = this.filter { it.finished }
 
-private val Array<out RoutineBuilder>.onlyUnfinished
+private val Array<out Routine>.onlyUnfinished
     get() = this.filter { !it.finished }
 
 /**
@@ -27,7 +27,7 @@ private val Array<out RoutineBuilder>.onlyUnfinished
  *
  * On interrupt, all still running routines are interrupted as well.
  */
-fun parallel(vararg routines: RoutineBuilder, name: String? = null, setup: Routine.() -> Unit = {}) =
+fun parallel(vararg routines: Routine, name: String? = null, setup: RoutineScope.() -> Unit = {}) =
     routine(name = name, typeName = "parallel") {
         for (routine in routines) {
             require(Collections.disjoint(routine.locks, locks)) {
@@ -38,7 +38,7 @@ fun parallel(vararg routines: RoutineBuilder, name: String? = null, setup: Routi
         display = { groupDisplayString(this, routines) { i, rt -> if (!rt.finished) ">" else "." } }
         setup()
         ready()
-        yieldWhile({ !routines.all(Routine::finished) }) {
+        yieldWhile({ !routines.all(RoutineScope::finished) }) {
             for (routine in routines.onlyUnfinished) {
                 routine.runSingleStep()
             }
@@ -53,7 +53,7 @@ fun parallel(vararg routines: RoutineBuilder, name: String? = null, setup: Routi
  *
  * On interrupt, the currently running routine is interrupted.
  */
-fun serial(vararg routines: RoutineBuilder, name: String? = null, setup: Routine.() -> Unit = {}) =
+fun serial(vararg routines: Routine, name: String? = null, setup: RoutineScope.() -> Unit = {}) =
     routine(name = name, typeName = "serial") {
         var current = 0
         requiresAll(routines.flatMap { it.locks })
@@ -77,10 +77,10 @@ fun serial(vararg routines: RoutineBuilder, name: String? = null, setup: Routine
  * finished get interrupted.
  */
 fun deadline(
-    deadline: RoutineBuilder,
-    vararg routines: RoutineBuilder,
+    deadline: Routine,
+    vararg routines: Routine,
     name: String? = null,
-    setup: Routine.() -> Unit = {},
+    setup: RoutineScope.() -> Unit = {},
 ) = routine(name = name, typeName = "deadline") {
     for (routine in routines) {
         require(Collections.disjoint(routine.locks, locks)) {

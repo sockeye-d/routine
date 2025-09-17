@@ -4,14 +4,14 @@ package dev.fishies.routine
 private typealias Action = () -> Unit
 
 /**
- * The thing that runs the [Routine]s
+ * The thing that runs the [RoutineScope]s
  */
 object RoutineManager {
     const val INDENT = "  "
 
-    private val routines = mutableListOf<RoutineBuilder>()
-    private val restartableRoutines = mutableListOf<RoutineBuilder>()
-    private val activeLocks = mutableMapOf<Any, RoutineBuilder>()
+    private val routines = mutableListOf<Routine>()
+    private val restartableRoutines = mutableListOf<Routine>()
+    private val activeLocks = mutableMapOf<Any, Routine>()
     private val deferredActions = ArrayDeque<Action>(0)
     private val subsystems = mutableSetOf<Subsystem>()
     private val triggers = ArrayList<TriggeredAction>()
@@ -34,7 +34,7 @@ object RoutineManager {
         subsystems.clear()
         triggers.clear()
 
-        RoutineBuilder.State.backingI = 0
+        Routine.State.i = 0
     }
 
     /**
@@ -66,7 +66,7 @@ object RoutineManager {
             val conflicts = conflictingRoutines(routine.locks)
             if (conflicts.isEmpty()) {
                 defer {
-                    routine.run(false)
+                    routine.start(false)
                     restartableRoutines.remove(routine)
                 }
             }
@@ -140,12 +140,15 @@ object RoutineManager {
         }
     }
 
-    internal fun defer(block: Action) = deferredActions.add(block)
-    internal fun lock(routine: RoutineBuilder) {
+    internal fun defer(block: Action) {
+        deferredActions.add(block)
+    }
+
+    internal fun lock(routine: Routine) {
         activeLocks.putAll(routine.locks.map { it to routine })
     }
 
-    internal fun unlock(routine: RoutineBuilder) {
+    internal fun unlock(routine: Routine) {
         routine.locks.forEach(activeLocks::remove)
     }
 
@@ -186,12 +189,12 @@ object RoutineManager {
 
     /**
      * Run this routine.
-     * If this routine's [Routine.locks] conflicts with any currently running routines'
-     * [Routine.locks], then one of two things will happen based on the value of [interruptOther]:
-     * * true → incumbent routine gets interrupted
+     * If this routine's [RoutineScope.locks] conflicts with any currently running routines'
+     * [RoutineScope.locks], then one of two things will happen based on the value of [interruptOther]:
+     * * true → currently running routine gets interrupted
      * * false → this routine doesn't get scheduled
      */
-    fun RoutineBuilder.run(interruptOther: Boolean = true) = defer {
+    fun Routine.start(interruptOther: Boolean = true) = defer {
         val conflicts = conflictingRoutines(this.locks)
         if (!interruptOther && !conflicts.isEmpty()) {
             return@defer
@@ -216,13 +219,12 @@ object RoutineManager {
      *
      * I don't know why you would want to do this, since this is mostly for internal use, but you certainly can.
      */
-    fun RoutineBuilder.interrupt() {
+    fun Routine.interrupt() {
         interruptRoutine()
         routines.remove(this)
         unlock(this)
     }
 }
-
 
 private data class TriggeredAction(
     val trigger: () -> Boolean,

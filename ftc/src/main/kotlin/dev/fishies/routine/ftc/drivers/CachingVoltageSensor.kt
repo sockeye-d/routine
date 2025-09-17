@@ -30,6 +30,11 @@ object CachingVoltageSensor {
             return lastVoltage
         }
 
+    /**
+     * Normalize the given power using the current voltage
+     */
+    fun normalize(power: Double) = power * nominalVoltage / voltage
+
     fun initialize(map: HardwareMapEx) {
         sensor = map.map?.getAll(VoltageSensor::class.java)?.first() ?: error("no voltage sensor found???")
     }

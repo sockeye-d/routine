@@ -1,30 +1,46 @@
 import dev.fishies.routine.RoutineManager
-import dev.fishies.routine.RoutineManager.run
+import dev.fishies.routine.RoutineManager.start
 import dev.fishies.routine.routine
 
-fun customCommand(subsystem: Any?, label: String) = routine {
+fun printStuffRoutine(subsystem: Any?, label: String, iterations: Int = 10) = routine(name = label) {
     subsystem?.lock()
     ready()
-    for (i in 1..10) {
-        println("$label: $i")
-        if (yield()) break
+    try {
+        for (i in 1..iterations) {
+            println("$label: $i")
+            yield()
+        }
+    } finally {
+        println("$label done")
     }
-    println("$label done")
 }
 
 fun main() {
     val subsystem = object {}
 
-    val rt1 = customCommand(subsystem, "a")
-
-    val rt2 = customCommand(subsystem, "b")
-
-    rt1.run()
-    RoutineManager.tick()
-    RoutineManager.tick()
-    RoutineManager.tick()
-    rt2.run(interruptOther = false)
-
-    @Suppress("ControlFlowWithEmptyBody") while (RoutineManager.tick()) {
+    val rt3 = routine(name = "rt3") {
+        subsystem.lock()
+        ready()
+        try {
+            await(routine {
+                ready()
+                await(printStuffRoutine(null, "a"))
+            })
+            await(printStuffRoutine(subsystem, "b"))
+            await(printStuffRoutine(subsystem, "c"))
+        } finally {
+            println("hi")
+        }
     }
+
+    rt3.start()
+
+    RoutineManager.tick()
+    RoutineManager.tick()
+    RoutineManager.tick()
+    RoutineManager.tick()
+
+    printStuffRoutine(subsystem, "d", iterations = 11).start()
+
+    while (RoutineManager.tick());
 }
