@@ -123,4 +123,20 @@ class HardwareMapEx() {
                 value ?: error("Can't construct $supplier before initialization")
         }
     }
+
+    inline fun <reified T> deferred(default: T, noinline supplier: () -> T): ReadOnlyProperty<Any?, T> {
+        var value: T? = null
+        val initAction = {
+            value = supplier()
+        }
+        if (map == null) {
+            initActions.add(initAction)
+        } else {
+            initAction()
+        }
+        return object : ReadOnlyProperty<Any?, T> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>) =
+                value ?: default
+        }
+    }
 }
