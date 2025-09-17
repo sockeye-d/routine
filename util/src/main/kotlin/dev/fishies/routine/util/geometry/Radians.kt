@@ -207,9 +207,15 @@ value class Radians(val radians: Double) : Comparable<Radians>, Formattable {
 inline val Number.radians
     get() = Radians(toDouble())
 
+/**
+ * Convert a value in degrees to [Radians]
+ */
 inline val Number.degrees
     get() = PI / 180.0 * toDouble()
 
+/**
+ * Convert a value in rotations to [Radians]
+ */
 inline val Number.rotations
     get() = TAU * toDouble()
 

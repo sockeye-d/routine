@@ -203,8 +203,7 @@ object RoutineManager {
         for (conflict in conflicts) {
             if (conflict.restart) {
                 restartableRoutines.add(conflict)
-                routines.remove(conflict)
-                unlock(conflict)
+                conflict.interrupt(false)
             } else {
                 conflict.interrupt()
             }
@@ -219,8 +218,8 @@ object RoutineManager {
      *
      * I don't know why you would want to do this, since this is mostly for internal use, but you certainly can.
      */
-    fun Routine.interrupt() {
-        interruptRoutine()
+    fun Routine.interrupt(soft: Boolean = true) {
+        if (!soft) interruptRoutine()
         routines.remove(this)
         unlock(this)
     }

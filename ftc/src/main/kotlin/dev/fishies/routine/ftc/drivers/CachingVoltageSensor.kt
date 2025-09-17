@@ -3,18 +3,18 @@ package dev.fishies.routine.ftc.drivers
 import dev.fishies.routine.ftc.extensions.HardwareMapEx
 import com.qualcomm.robotcore.hardware.VoltageSensor
 import dev.fishies.routine.ftc.drivers.CachingVoltageSensor.voltage
+import dev.fishies.routine.util.Timer
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 object CachingVoltageSensor {
     private lateinit var sensor: VoltageSensor
-    private var lastReadTime = 0L
+    private var readTimer = Timer()
 
     /**
      * This is the voltage we want the robot to always try to operate at.
      * */
     var nominalVoltage: Double = 12.5
-    private var lastVoltage = nominalVoltage
 
     /**
      * How long a reading can stay alive.
@@ -23,11 +23,16 @@ object CachingVoltageSensor {
      */
     var cacheInvalidateTime: Duration = 0.5.seconds
 
-    val voltage
+    var voltage = nominalVoltage
+        private set
         get(): Double {
-            lastVoltage =
-                if (System.nanoTime() - lastReadTime > cacheInvalidateTime.inWholeNanoseconds) sensor.voltage else lastVoltage
-            return lastVoltage
+            field = if (readTimer.elapsed > cacheInvalidateTime) {
+                readTimer.reset()
+                sensor.voltage
+            } else {
+                field
+            }
+            return field
         }
 
     /**

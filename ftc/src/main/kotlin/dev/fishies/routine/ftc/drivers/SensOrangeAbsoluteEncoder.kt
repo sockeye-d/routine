@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.configuration.annotations.DevicePropertie
 import dev.fishies.routine.util.geometry.Radians
 import dev.fishies.routine.util.geometry.degrees
 import dev.fishies.routine.util.geometry.radians
+import dev.fishies.routine.util.geometry.times
 
 @AnalogSensorType
 @DeviceProperties(
@@ -32,8 +33,7 @@ class SensOrangeAbsoluteEncoder(
     private var lastAngle = Radians.ZERO
 
     val angle
-        get() = (voltage.radians * maxAngle / maxReportedVoltage).rotated(offset)
-            .let(if (inverted) { it -> -it } else { it -> it })
+        get() = ((if (inverted) -1.0 else 1.0) * voltage.radians * maxAngle / maxReportedVoltage).rotated(offset)
 
     override fun getDeviceName() = "sensOrange® Absolute Encoder"
 

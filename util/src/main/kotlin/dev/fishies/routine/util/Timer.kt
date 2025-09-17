@@ -8,5 +8,5 @@ class Timer(private val timeSource: TimeSource.WithComparableMarks = TimeSource.
         now = timeSource.markNow()
     }
 
-    val elapsed = now.elapsedNow()
+    val elapsed get() = now.elapsedNow()
 }

@@ -17,10 +17,10 @@ ${routines.mapIndexed { i, rt -> rt.toString() }.joinToString("\n").prependInden
 """.trimMargin()
 
 private val Array<out Routine>.onlyFinished
-    get() = this.filter { it.finished }
+    get() = filter { it.finished }
 
 private val Array<out Routine>.onlyUnfinished
-    get() = this.filter { !it.finished }
+    get() = filter { !it.finished }
 
 /**
  * Run a set of routines in parallel.
@@ -38,13 +38,17 @@ fun parallel(vararg routines: Routine, name: String? = null, setup: RoutineScope
         display = { groupDisplayString(this, routines) { i, rt -> if (!rt.finished) ">" else "." } }
         setup()
         ready()
-        yieldWhile({ !routines.all(RoutineScope::finished) }) {
-            for (routine in routines.onlyUnfinished) {
-                routine.runSingleStep()
+        try {
+            while (!routines.all(RoutineScope::finished)) {
+                for (routine in routines.onlyUnfinished) {
+                    routine.runSingleStep()
+                }
+                yield()
             }
-        }
-        for (routine in routines.onlyUnfinished) {
-            routine.interrupt()
+        } finally {
+            for (routine in routines.onlyUnfinished) {
+                routine.interrupt()
+            }
         }
     }
 
@@ -60,13 +64,16 @@ fun serial(vararg routines: Routine, name: String? = null, setup: RoutineScope.(
         display = { groupDisplayString(this, routines) { i, _ -> if (i == current) ">" else "." } }
         setup()
         ready()
-        yieldWhile({ current < routines.size }) {
-            routines[current].runSingleStep()
-            if (routines[current].finished) current++
-        }
-
-        if (current in routines.indexRange) {
-            routines[current].interrupt()
+        try {
+            while (current < routines.size) {
+                routines[current].runSingleStep()
+                if (routines[current].finished) current++
+                yield()
+            }
+        } finally {
+            if (current in routines.indexRange) {
+                routines[current].interrupt()
+            }
         }
     }
 
@@ -91,14 +98,17 @@ fun deadline(
     display = { groupDisplayString(this, arrayOf(deadline, *routines)) { i, rt -> if (!rt.finished) ">" else "." } }
     setup()
     ready()
-    yieldWhile({ !deadline.finished && routines.onlyUnfinished.isNotEmpty() }) {
-        deadline.runSingleStep()
-        for (routine in routines.onlyUnfinished) {
-            routine.runSingleStep()
+    try {
+        while (!deadline.finished) {
+            deadline.runSingleStep()
+            for (routine in routines.onlyUnfinished) {
+                routine.runSingleStep()
+            }
+            yield()
         }
-    }
-
-    for (routine in routines.onlyUnfinished) {
-        routine.interrupt()
+    } finally {
+        for (routine in routines.onlyUnfinished) {
+            routine.interrupt()
+        }
     }
 }

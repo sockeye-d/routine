@@ -115,11 +115,11 @@ class Routine internal constructor(
 
     fun runInit() {
         startContinuation.resume(Unit)
-        assert(!finished) { "Command finished before ticking (did you forget ready()?)" }
+        assert(!finished) { "$this finished before ticking (did you forget ready()?)" }
     }
 
     fun runSingleStep() {
-        assert(!finished) { "Already finished (did you attempt to reuse a command?)" }
+        assert(!finished) { "$this Already finished (did you attempt to reuse a command?)" }
         if (initialized) {
             yieldContinuation.resume(false)
         } else {
@@ -170,6 +170,10 @@ class Routine internal constructor(
     override fun toString() = "${idleDisplay()} ($typeName) ${display()}"
 }
 
+/**
+ * Thrown when a routine is interrupted, normally by another routine with conflicting locks being scheduled.
+ * Catch it in a try/finally block to clean up after interruption.
+ */
 class RoutineInterruptedException : Throwable()
 
 /**
@@ -218,7 +222,7 @@ fun routine(
 suspend inline fun RoutineScope.forever(block: suspend RoutineScope.() -> Unit) {
     while (true) {
         this.block()
-        if (yield()) break
+        yield()
     }
 }
 
@@ -231,6 +235,6 @@ suspend inline fun RoutineScope.yieldWhile(
 ) {
     while (condition()) {
         this.block()
-        if (yield()) break
+        yield()
     }
 }
