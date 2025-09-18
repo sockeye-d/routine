@@ -12,6 +12,9 @@ import kotlin.time.Duration
  */
 fun Routine.timeout(duration: Duration) = deadline(wait(duration), this)
 
+/**
+ * Interrupt this command once [condition] is true.
+ */
 fun Routine.stopWhen(condition: () -> Boolean) = deadline(waitUntil(condition), this)
 
 suspend fun RoutineScope.delay(duration: Duration) {

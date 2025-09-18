@@ -72,8 +72,8 @@ sealed class Button(value: Gamepad.() -> Boolean) : GamepadInput<Boolean>(value)
     data object GUIDE : Button({ guide })
     data object SHARE : Button({ share })
     data object OPTIONS : Button({ options })
-    data object STICK_BUTTON_LEFT : Button({ left_stick_button })
-    data object STICK_BUTTON_RIGHT : Button({ right_stick_button })
+    data object STICK_LEFT : Button({ left_stick_button })
+    data object STICK_RIGHT : Button({ right_stick_button })
 }
 
 sealed class Analog(value: Gamepad.() -> Double) : GamepadInput<Double>(value) {

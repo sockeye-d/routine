@@ -1,5 +1,6 @@
 package dev.fishies.routine
 
+import dev.fishies.routine.routine
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.TimeSource
@@ -35,15 +36,20 @@ fun wait(duration: Duration) = routine(typeName = "wait") {
 }
 
 /**
- * A [routine] that waits until [condition] is false.
+ * A [routine] that waits until [condition] is true.
  */
 fun waitUntil(condition: () -> Boolean) = routine(typeName = "waitUntil") {
     ready()
     display = { "$name ($condition)" }
-    yieldWhile({ condition() }) {}
+    while (!condition()) yield()
 }
 
 /**
  * The [Unit] routine — e.g., a routine that does nothing, also known as a /no-?op/.
  */
-fun unit() = routine { ready() }
+fun unit() = routine(name = "Unit", typeName = "unit") { ready() }
+
+fun instant(action: () -> Unit) = routine {
+    ready()
+    action()
+}

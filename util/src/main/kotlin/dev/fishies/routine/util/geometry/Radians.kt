@@ -6,6 +6,7 @@ import dev.fishies.routine.util.math.umod
 import dev.fishies.routine.util.ClosedRangeT
 import dev.fishies.routine.util.OpenRangeT
 import java.util.*
+import kotlin.math.absoluteValue
 import kotlin.math.acos
 import kotlin.math.asin
 import kotlin.math.atan
@@ -325,3 +326,21 @@ fun ceil(value: Radians, increment: Radians) = ceil(value / increment) * increme
  * @see ceil
  */
 fun round(value: Radians, increment: Radians) = round(value / increment) * increment
+
+/**
+ * Returns the absolute value of a [Radians] value.
+ * If the argument is not negative, the argument is returned.
+ * If the argument is negative, the negation of the argument is returned.
+ * Special cases:
+ * * If the argument is positive zero or negative zero, the result is positive zero.
+ * * If the argument is infinite, the result is positive infinity.
+ * * If the argument is NaN, the result is NaN.
+ * In other words, the result is the same as the value of the expression:
+ * ```
+ * Double.longBitsToDouble((Double.doubleToLongBits(a)<<1)>>>1)
+ * ```
+ *
+ * @param   value   the argument whose absolute value is to be determined
+ * @return  the absolute value of the argument.
+ */
+fun abs(value: Radians) = value.radians.absoluteValue.radians

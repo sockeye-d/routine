@@ -148,3 +148,5 @@ fun Double.halfLinearHalfCubic() = this * 0.5 + this * this * this * 0.5
 fun Vector2.halfLinearHalfCubic() = this * 0.5 + this * this * this * 0.5
 
 fun Double.symmetricSqrt() = sqrt(absoluteValue) * sign
+
+inline fun Double.sqr() = this * this

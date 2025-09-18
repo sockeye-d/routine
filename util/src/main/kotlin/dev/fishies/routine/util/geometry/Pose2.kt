@@ -15,7 +15,7 @@ data class Pose2(val xy: Vector2, val h: Radians) {
     operator fun minus(other: Pose2) = Pose2(xy - other.xy, h.rotated(-other.h))
 
     /**
-     * Simultaneously calculates the positional and angular distance between this and [other].
+     * Simultaneously calculates the positional and **signed** angular distance between this and [other].
      *
      * @param other The other [Pose2] to calculate the distance to
      */
