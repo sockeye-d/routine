@@ -9,7 +9,7 @@ abstract class Subsystem(val name: String? = null) {
         RoutineManager.registerSubsystem(this)
     }
 
-    abstract fun tick()
+    open fun tick() {}
 
     override fun toString() = name ?: this::class.simpleName ?: "<anonymous>"
 }
